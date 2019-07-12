@@ -1,0 +1,34 @@
+        public void SaveCatalog()
+        {
+            var SaveFileDialog = new SaveFileDialog();
+            SaveFileDialog.DefaultExt = ".ini";
+            if (SaveFileDialog.ShowDialog() == true)
+            {
+                var catalog = System.IO.Path.GetDirectoryName(SaveFileDialog.FileName.ToString());
+                //Создание каталога Picture
+                string subpath = @"Picture";
+                DirectoryInfo dirInfo = new DirectoryInfo(catalog);
+                if (!dirInfo.Exists)
+                {
+                    dirInfo.Create();
+                }
+                var path = dirInfo.CreateSubdirectory(subpath);
+                foreach (var item in Playlist.ImageViewPanel)
+                {
+                    var bytes = File.ReadAllBytes(item.Path);
+                    File.WriteAllBytes(System.IO.Path.Combine(path.ToString(), System.IO.Path.GetFileName(item.Name)), bytes);
+                }
+
+                var reader = new IniFiles(SaveFileDialog.FileName);
+                Playlist.ImageViewPanel[0].Path = path.ToString();
+                reader.Write("Playlist", "Name", System.IO.Path.GetFileNameWithoutExtension(SaveFileDialog.FileName));
+                reader.Write("Playlist", "Discription", Playlist.Description);
+                for (int i = 0; i < Playlist.ImageViewPanel.Count; i++)
+                {
+                    reader.Write((i + 1).ToString(), "Name", Playlist.ImageViewPanel[i].Name);
+                    reader.Write((i + 1).ToString(), "Duration", Playlist.ImageViewPanel[i].Lasting.ToString());
+                    reader.Write((i + 1).ToString(), "Effect", Playlist.ImageViewPanel[i].Effect);
+                }
+                System.Windows.MessageBox.Show("Файл сохранен");
+            }
+        }
